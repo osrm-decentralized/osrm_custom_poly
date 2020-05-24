@@ -1,5 +1,5 @@
 # osrm_custom_poly
-A ready docker config to deploy OSRM for any place, using custom pbf
+A ready docker config to deploy OSRM for any place, using custom .poly file
 
 ![delhi-screenshot](delhi-screenshot.png)
 
