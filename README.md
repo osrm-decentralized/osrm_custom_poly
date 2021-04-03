@@ -17,20 +17,20 @@ mkdir -p data/
 ```
 This will be your main persistent storage volume, where you can retain the data used by OSRM between runs.
 
-### Put ze .poly in ze data/
+### Put .poly shape in data/ folder
+Put your .poly file into the data/ folder.
+
 Get the custom shape that you want to run OSRM on, in a .poly file format.  
 Check out https://github.com/osrm-decentralized/shapes-to-poly for converting your shapefile into .poly .
 
 You can also find alternative tools here: https://wiki.openstreetmap.org/wiki/Osmosis/Polygon_Filter_File_Format#Converting_to.2Ffrom_POLY_format or see the specs and author one yourself.
-
-Put your .poly file into the data/ folder.
 
 Note: don't have a .poly and just want to run on a known .pbf? Go to https://github.com/osrm-decentralized/osrm_custom_pbf
 
 
 ### Running OSRM for a place in India:
 
-Let's assume you've followed the section above and placed a "city.poly" in your data/ folder.
+Let's assume you've followed the section above and placed the "shape-test-goa.poly" sample file included in this repo in your data/ folder.
 
 The URL for geofabrik's India OSM pbf data is: https://download.geofabrik.de/asia/india-latest.osm.pbf
 
@@ -41,10 +41,10 @@ docker run \
 	--rm -it \
 	-p 5000:5000 \
 	-v $(pwd)/data:/data \
-	-v $(pwd)/profiles:/profiles \
-	-e PROFILE='/profiles/car-modified.lua' \
+	-e PROFILE='car-modified.lua' \
 	-e PBFURL='https://download.geofabrik.de/asia/india-latest.osm.pbf' \
-	-e POLYFILE='/data/city.poly' \
+	-e POLYFILE='/data/shape-test-goa.poly' \
+	-e BUILD='Y' \
 	osrm_custom_poly
 ```
 
@@ -55,12 +55,13 @@ Each commandline option explained:
 - `--rm -it` - runs as an interactive terminal, and upon termination closes the container. Good for development. When deploying, you'll want to replace `--rm -it` with `-d` so it runs detached as a background process.
 - `-p 5000:5000` - **Port mapping**: Change the left side number if you want to deploy on another port. Like: to deplot on :8000, `-p 8000:5000`
 - `-v $(pwd)/data:/data` - **Volume**: mounts the data/ folder in your current directory as a persistent storage volume used by the program. You'll see a lot of files collecting there when you run.
-- `-v $(pwd)/profiles:/profiles` - mounts the profiles/ folder in this repo (should also be in your current directory) likewise.
 - `-e PBFURL='https://server.nikhilvj.co.in/dump/delhi.pbf'` - **ENV**: Instructs the program to download and use this PBF as source data. This is passed in as an environment variable (for the compose/kubernetes folks)
 - `-e PROFILE='/profiles/car-modified.lua'` - Similar to above, specifies which profile from the profiles/ folder to use.
+- `-e POLYFILE='/data/shape-test-goa.poly'` - set the name of your .poly file
+- `-e BUILD='Y'` - set BUILD to 'Y' to build the graph. In case you're restarting and already have the graph built up, set this to 'N'.
 
 
-Note: If you close and run the dockerised program again, if the .pbf online hasn't been updated on server since last download, then downloading will be skipped and your OSRM instance will start quicker next time.
+Note: If you close and run the dockerised program again, if the .pbf online hasn't been updated on server since last download, then downloading will be skipped. If BUILD is set to N, the whole graph creation is skipped and your OSRM instance will start quicker next time.
 
 
 ## Run OSRM Frontend
@@ -73,7 +74,7 @@ docker run \
 	-p 9966:9966 \
 	-e OSRM_BACKEND='http://localhost:5000' \
 	-e OSRM_CENTER='28.6,77.26' \
-	-e OSRM_ZOOM='11' \
+	-e OSRM_ZOOM='8' \
 	osrm/osrm-frontend
 ```
 
@@ -84,7 +85,7 @@ Each commandline option explained:
 - `-p 9966:9966` : Port mapping. Change the left side number if you want to deploy on another port.
 - `-e OSRM_BACKEND='http://localhost:5000'` : To tell the frontend where the API is. If you've deployed your OSRM API instance on cloud, use the public IP / URL.
 - `-e OSRM_CENTER='28.6,77.26'` : Starting lat-long when you open on browser. These are delhi's lat-longs; replace with yours.
-- `-e OSRM_ZOOM='11'` : Starting zoom level
+- `-e OSRM_ZOOM='8'` : Starting zoom level
 
 again, change `--rm -it` to `-d` to detach the container and run it in background instead of on an active terminal (imp when deploying)
 

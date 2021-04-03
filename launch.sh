@@ -1,50 +1,73 @@
 #!/bin/bash
 
 # 14.5.2020
-# OSRM using pre-made .pbf's from https://server.nikhilvj.co.in/dump/ or other source
+# OSRM using custom .poly shape applied to pre-made .pbf's from https://server.nikhilvj.co.in/dump/ or other source
 
-# check if .poly is available
-ls -lrt /data/
-
-if [ ! -f "${POLYFILE}" ]
-then
-    echo "${POLYFILE} not found. Exiting"
-	exit 1
-fi
+# Updated on 2.4.2021
 
 # bring in environment variables
-# var=${DEPLOY_ENV:-default_value} - from https://stackoverflow.com/a/39296572/4355695
-OSMPBF=${PBFURL:-https://server.nikhilvj.co.in/dump/chennai.pbf}
-profile=${PROFILE:-/profiles/car-modified.lua}
+PBF_URL=${PBF_URL:-https://download.geofabrik.de/asia/india-latest.osm.pbf}
 
-# downloading OSM data from URL. Saves as area.pbf for simplicity in later commands.
-cd /data/
-wget -N --timeout=20 ${OSMPBF}
-bigpbf="${OSMPBF##*/}"
-# first arg: get just the last part of the URL - the original pbf filename. from https://unix.stackexchange.com/questions/325490/how-to-get-last-part-of-http-link-in-bash#325492
-# this is done to let the wget -N command work where it skips download if existing file is not older than one on server.
+MAX_MATCHING_SIZE=${MAX_MATCHING_SIZE:--1}
 
-# clip pbf to .poly extents
-echo "$(date): Starting osmconvert to clip ${bigpbf} to ${POLYFILE} extents"
-osmconvert "/data/${bigpbf}" -B="${POLYFILE}" --complete-ways -o="/data/area.pbf"
+MAX_TABLE_SIZE=${MAX_TABLE_SIZE:-1000}
 
-echo "$(date): Created smaller pbf using ${POLYFILE}"
-ls -lrt /data/
+PROFILE=${PROFILE:-car-modified.lua}
 
-# compiling commands of OSRM - builds the graph
-echo "$(date): Building OSRM graph"
-osrm-extract -p ${profile} /data/area.pbf
-osrm-partition /data/area.osrm
-osrm-customize /data/area.osrm
-echo "$(date): Done buildng OSRM graph"
+BUILD=${BUILD:-N}
 
-# list all files created in compile
-ls -lS /data/
+if [ "$BUILD" == "Y" ] 
+then
+    echo "$(date +"%Y-%m-%d %H:%M:%S"): BUILD = Y"
+
+    if [ ! -f "${POLYFILE}" ]
+    then
+        echo "${POLYFILE} not found. Exiting"
+        exit 1
+    fi
+
+    # make a folder in PV
+    mkdir -p "/data/osm_pbf/"
+    # go to folder in persistent storage volume
+    cd "/data/osm_pbf/"
+
+    # download .pbf if newer
+    echo "$(date +"%Y-%m-%d %H:%M:%S"): Downloading ${PBF_URL} if newer"
+    wget -N -q --timeout=20 ${PBF_URL}
+
+    # change to /data folder : this should be mounted persistent volume
+    cd /data
+
+    # cutting down by bounds
+    echo "$(date +"%Y-%m-%d %H:%M:%S"): Starting osmconvert to clip to shape.poly"
+    # osmconvert bigarea.pbf -B="/app/${POLYFILE}" --complete-ways -o=area.pbf
+    osmconvert "osm_pbf/${PBF_URL##*/}" -B="${POLYFILE}" --complete-ways -o=area.pbf
+
+    # compiling commands of OSRM - builds the graph
+    echo "$(date +"%Y-%m-%d %H:%M:%S"): Running osrm-extract"
+    osrm-extract -p "/app/profiles/${PROFILE}" area.pbf
+    ls -lS --block-size=M
+
+    echo "$(date +"%Y-%m-%d %H:%M:%S"): Running osrm-partition"
+    osrm-partition area.osrm
+    ls -lS --block-size=M
+
+    echo "$(date +"%Y-%m-%d %H:%M:%S"): Running osrm-customize"
+    osrm-customize area.osrm
+
+    echo "$(date +"%Y-%m-%d %H:%M:%S"): Done building osrm graph"
+
+else
+    echo "$(date +"%Y-%m-%d %H:%M:%S"): Skipping build process as BUILD = N"
+
+fi
+
+# launch OSRM-backend API
+cd /data
+ls -lS --block-size=M
 
 # setting env variable DISABLE_ACCESS_LOGGING=1 for improving performance
-DISABLE_ACCESS_LOGGING=1
-export DISABLE_ACCESS_LOGGING
+export DISABLE_ACCESS_LOGGING=1
 
-echo "$(date): Launching OSRM API server"
-# launch OSRM-backend API
-osrm-routed --algorithm mld /data/area.osrm
+echo "$(date +"%Y-%m-%d %H:%M:%S"): Launching osrm-routed, default port 5000"
+osrm-routed --algorithm mld --max-matching-size=${MAX_MATCHING_SIZE} --max-table-size=${MAX_TABLE_SIZE} area.osrm

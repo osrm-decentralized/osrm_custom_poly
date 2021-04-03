@@ -14,7 +14,7 @@ Measure = require("lib/measure")
 function setup()
   return {
     properties = {
-      max_speed_for_map_matching      = 100/3.6, -- 180kmph -> m/s
+      max_speed_for_map_matching      = 50/3.6, -- 180kmph -> m/s
       -- For routing based on duration, but weighted for preferring certain roads
       weight_name                     = 'routability',
       -- For shortest duration without penalties for accessibility
@@ -30,7 +30,7 @@ function setup()
     },
 
     default_mode              = mode.driving,
-    default_speed             = 10,
+    default_speed             = 30/3.6,
     oneway_handling           = true,
     side_road_multiplier      = 0.8,
     turn_penalty              = 7.5,
@@ -139,20 +139,20 @@ function setup()
 
     speeds = Sequence {
       highway = {
-        motorway        = 90,
-        motorway_link   = 45,
-        trunk           = 85,
-        trunk_link      = 40,
-        primary         = 65,
-        primary_link    = 30,
-        secondary       = 55,
-        secondary_link  = 25,
-        tertiary        = 40,
-        tertiary_link   = 20,
-        unclassified    = 25,
-        residential     = 25,
-        living_street   = 10,
-        service         = 15
+        motorway        = 40/3.6, -- 90,
+        motorway_link   = 40/3.6, -- 45,
+        trunk           = 40/3.6, -- 85,
+        trunk_link      = 40/3.6, -- 40,
+        primary         = 40/3.6, -- 65,
+        primary_link    = 40/3.6, -- 30,
+        secondary       = 40/3.6, -- 55,
+        secondary_link  = 40/3.6, -- 25,
+        tertiary        = 30/3.6, -- 40,
+        tertiary_link   = 30/3.6, -- 20,
+        unclassified    = 30/3.6, -- 25,
+        residential     = 20/3.6, -- 25,
+        living_street   = 20/3.6, -- 10,
+        service         = 20/3.6, -- 15
       }
     },
 
@@ -208,101 +208,103 @@ function setup()
       ["concrete:lanes"] = nil,
       paved = nil,
 
-      cement = 80,
-      compacted = 80,
-      fine_gravel = 80,
+      cement = 40/3.6, --80,
+      compacted = 40/3.6, --80,
+      fine_gravel = 40/3.6, --80,
 
-      paving_stones = 60,
-      metal = 60,
-      bricks = 60,
+      paving_stones = 40/3.6, --60,
+      metal = 40/3.6, --60,
+      bricks = 40/3.6, --60,
 
-      grass = 40,
-      wood = 40,
-      sett = 40,
-      grass_paver = 40,
-      gravel = 40,
-      unpaved = 40,
-      ground = 40,
-      dirt = 40,
-      pebblestone = 40,
-      tartan = 40,
+      grass = 20/3.6, --40,
+      wood = 20/3.6, --40,
+      sett = 20/3.6, --40,
+      grass_paver = 20/3.6, --40,
+      gravel = 20/3.6, --40,
+      unpaved = 20/3.6, --40,
+      ground = 20/3.6, --40,
+      dirt = 20/3.6, --40,
+      pebblestone = 20/3.6, --40,
+      tartan = 20/3.6, --40,
 
-      cobblestone = 30,
-      clay = 30,
+      cobblestone = 20/3.6, --30,
+      clay = 20/3.6, --30,
 
-      earth = 20,
-      stone = 20,
-      rocky = 20,
-      sand = 20,
+      earth = 20/3.6, --20,
+      stone = 20/3.6, --20,
+      rocky = 20/3.6, --20,
+      sand = 10/3.6, --20,
 
-      mud = 10
+      mud = 10/3.6, --10
     },
 
     -- max speed for tracktypes
     tracktype_speeds = {
-      grade1 =  60,
-      grade2 =  40,
-      grade3 =  30,
-      grade4 =  25,
-      grade5 =  20
+      grade1 =  40/3.6, --60,
+      grade2 =  40/3.6, --40,
+      grade3 =  40/3.6, --30,
+      grade4 =  40/3.6, --25,
+      grade5 =  40/3.6, --20
     },
 
     -- max speed for smoothnesses
     smoothness_speeds = {
-      intermediate    =  80,
-      bad             =  40,
-      very_bad        =  20,
-      horrible        =  10,
-      very_horrible   =  5,
+      intermediate    =  40/3.6, --80,
+      bad             =  40/3.6, --40,
+      very_bad        =  20/3.6, --20,
+      horrible        =  10/3.6, --10,
+      very_horrible   =  10/3.6, --5,
       impassable      =  0
     },
 
     -- http://wiki.openstreetmap.org/wiki/Speed_limits
     maxspeed_table_default = {
-      urban = 50,
-      rural = 90,
-      trunk = 110,
-      motorway = 130
+      urban = 40/3.6, --50,
+      rural = 40/3.6, --90,
+      trunk = 50/3.6, --110,
+      motorway = 50/3.6, --130
     },
 
     -- List only exceptions
     maxspeed_table = {
-      ["at:rural"] = 100,
-      ["at:trunk"] = 100,
-      ["be:motorway"] = 120,
-      ["be-vlg:rural"] = 70,
-      ["by:urban"] = 60,
-      ["by:motorway"] = 110,
-      ["ch:rural"] = 80,
-      ["ch:trunk"] = 100,
-      ["ch:motorway"] = 120,
-      ["cz:trunk"] = 0,
-      ["cz:motorway"] = 0,
-      ["de:living_street"] = 7,
-      ["de:rural"] = 100,
-      ["de:motorway"] = 0,
-      ["dk:rural"] = 80,
-      ["fr:rural"] = 80,
-      ["gb:nsl_single"] = (60*1609)/1000,
-      ["gb:nsl_dual"] = (70*1609)/1000,
-      ["gb:motorway"] = (70*1609)/1000,
-      ["nl:rural"] = 80,
-      ["nl:trunk"] = 100,
-      ['no:rural'] = 80,
-      ['no:motorway'] = 110,
-      ['pl:rural'] = 100,
-      ['pl:trunk'] = 120,
-      ['pl:motorway'] = 140,
-      ["ro:trunk"] = 100,
-      ["ru:living_street"] = 20,
-      ["ru:urban"] = 60,
-      ["ru:motorway"] = 110,
-      ["uk:nsl_single"] = (60*1609)/1000,
-      ["uk:nsl_dual"] = (70*1609)/1000,
-      ["uk:motorway"] = (70*1609)/1000,
-      ['za:urban'] = 60,
-      ['za:rural'] = 100,
-      ["none"] = 140
+      -- ["at:rural"] = 100,
+      -- ["at:trunk"] = 100,
+      -- ["be:motorway"] = 120,
+      -- ["be-bru:rural"] = 70,
+      -- ["be-bru:urban"] = 30,
+      -- ["be-vlg:rural"] = 70,
+      -- ["by:urban"] = 60,
+      -- ["by:motorway"] = 110,
+      -- ["ch:rural"] = 80,
+      -- ["ch:trunk"] = 100,
+      -- ["ch:motorway"] = 120,
+      -- ["cz:trunk"] = 0,
+      -- ["cz:motorway"] = 0,
+      -- ["de:living_street"] = 7,
+      -- ["de:rural"] = 100,
+      -- ["de:motorway"] = 0,
+      -- ["dk:rural"] = 80,
+      -- ["fr:rural"] = 80,
+      -- ["gb:nsl_single"] = (60*1609)/1000,
+      -- ["gb:nsl_dual"] = (70*1609)/1000,
+      -- ["gb:motorway"] = (70*1609)/1000,
+      -- ["nl:rural"] = 80,
+      -- ["nl:trunk"] = 100,
+      -- ['no:rural'] = 80,
+      -- ['no:motorway'] = 110,
+      -- ['pl:rural'] = 100,
+      -- ['pl:trunk'] = 120,
+      -- ['pl:motorway'] = 140,
+      -- ["ro:trunk"] = 100,
+      -- ["ru:living_street"] = 20,
+      -- ["ru:urban"] = 60,
+      -- ["ru:motorway"] = 110,
+      -- ["uk:nsl_single"] = (60*1609)/1000,
+      -- ["uk:nsl_dual"] = (70*1609)/1000,
+      -- ["uk:motorway"] = (70*1609)/1000,
+      -- ['za:urban'] = 60,
+      -- ['za:rural'] = 100,
+      ["none"] = 40/3.6, --140
     },
 
     relation_types = Sequence {

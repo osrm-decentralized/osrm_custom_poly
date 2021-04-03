@@ -8,7 +8,7 @@ Handlers = require("lib/way_handlers")
 find_access_tag = require("lib/access").find_access_tag
 
 function setup()
-  local walking_speed = 5
+  local walking_speed = 5/3.6
   return {
     properties = {
       -- weight_name                   = 'duration', -- changing to other
@@ -16,7 +16,7 @@ function setup()
       -- weight_name                   = 'routability', -- erroring
       -- weight_name                   = 'cyclability', -- erroring
       -- For shortest distance without penalties for accessibility , copied from car.lua
-      max_speed_for_map_matching    = 40/3.6, -- kmph -> m/s
+      max_speed_for_map_matching    = 30/3.6, -- kmph -> m/s
       call_tagless_node_function    = false,
       traffic_light_penalty         = 0, -- 2
       u_turn_penalty                = 0, -- 2
@@ -51,7 +51,7 @@ function setup()
 
     restricted_access_tag_list = Set { },
 
-    restricted_highway_whitelist = Set { }, -- in foot.lua. Replacing with section from car.lua
+    restricted_highway_whitelist = Set { },
 
     construction_whitelist = Set {},
 
@@ -98,6 +98,7 @@ function setup()
         -- adding trunk with the hopes that it'll bite -- FINALLY THIS WORKED
         trunk           = walking_speed,
         trunk_link      = walking_speed,
+        motorway        = walking_speed,
       },
 
       railway = {
@@ -261,7 +262,7 @@ function process_turn (profile, turn)
   if profile.properties.weight_name == 'routability' then
       -- penalize turns from non-local access only segments onto local access only tags
       if not turn.source_restricted and turn.target_restricted then
-          turn.weight = turn.weight -- changed from turn.weight + 3000. oh but what the heck our weight_name = 'duration' so this doesn't even apply.
+          turn.weight = turn.weight + 3000
       end
   end
 end
